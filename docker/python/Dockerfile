@@ -1,7 +1,8 @@
 ARG UBUNTU_VERSION=20.04
 ARG CUVIS_VERSION=3.3.0
 
-FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
+# FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
+FROM ttl.sh/ede5db8c-c99e-40ad-960c-b478da607382 as pyil_base
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION
@@ -21,23 +22,24 @@ COPY --from=pyil_base /app/cuvis.pyil /app/cuvis.pyil
 ENV DEBIAN_FRONTEND=noninteractive 
 
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install git wget unzip -y
 	
-RUN mkdir cuvis_tmp && cd cuvis_tmp && \
+WORKDIR /tmp
+	
+RUN mkdir cuvis && cd cuvis && \
     wget https://cloud.cubert-gmbh.de/s/qpxkyWkycrmBK9m/download -q && \
     unzip -q download && \
     cd  "Cuvis ${CUVIS_MINOR_V}/Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
     apt-get install ./cuviscommon_${CUVIS_VERSION}-1.deb -y && \
     apt-get install ./libcuvis_${CUVIS_VERSION}-1.deb -y && \
-    cd / && \
-    rm -r /cuvis_tmp
+    cd /tmp && \
+    rm -rf ./cuvis
 	
 ENV CUVIS=/lib/cuvis
 
 ARG PYTHON_VERSION=3.9
 
-RUN apt-get install curl python${PYTHON_VERSION} python${PYTHON_VERSION}-venv -y && \
+RUN apt-get install curl python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev -y && \
 	curl -sS https://bootstrap.pypa.io/get-pip.py | python${PYTHON_VERSION}
 
 WORKDIR /app
@@ -48,3 +50,7 @@ RUN cd cuvis.pyil && \
 RUN git clone https://github.com/cubert-hyperspectral/cuvis.python.git && \
 	cd cuvis.python && \
 	python${PYTHON_VERSION} -m pip install .	
+	
+# Check if sdk wrapper can be loaded	
+RUN OUTPUT=$(python${PYTHON_VERSION} -c "import cuvis; print(cuvis.version())") && \
+	echo "$OUTPUT" | grep -q "CUBERT SDK" || exit 1
