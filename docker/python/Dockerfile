@@ -1,8 +1,7 @@
 ARG UBUNTU_VERSION=20.04
 ARG CUVIS_VERSION=3.3.0
 
-# FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
-FROM ttl.sh/ede5db8c-c99e-40ad-960c-b478da607382 as pyil_base
+FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION
