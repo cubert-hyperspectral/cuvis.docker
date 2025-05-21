@@ -1,10 +1,10 @@
-ARG UBUNTU_VERSION=20.04
+ARG UBUNTU_VERSION=24.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION
-ARG CUVIS_VERSION=3.3.1
+ARG CUVIS_VERSION=3.3.3
 ARG CUVIS_MINOR_V=3.3
 
 ### Avoid installer user interaction

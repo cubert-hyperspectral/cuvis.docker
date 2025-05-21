@@ -1,10 +1,10 @@
-ARG UBUNTU_VERSION=20.04
+ARG UBUNTU_VERSION=24.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION
-ARG CUVIS_VERSION=3.3.1
+ARG CUVIS_VERSION=3.3.3
 ARG CUVIS_MINOR_V=3.3
 
 ### Avoid installer user interaction
@@ -24,14 +24,14 @@ RUN mkdir cuvis && cd cuvis && \
     cd /tmp && \
     rm -rf ./cuvis
 
-ARG PYTHON_VERSION=3.9
-ARG NUMPY_VERSION=1.22.0
+ARG PYTHON_VERSION=3.12
+ARG NUMPY_VERSION=1.26.0
 
 ENV CUVIS=/lib/cuvis
 
 RUN apt-get install curl gcc g++ make swig -y && \
-    apt-get install python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev -y && \
-	curl -sS https://bootstrap.pypa.io/get-pip.py | python${PYTHON_VERSION}
+    apt-get install python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev python3-pip -y
+
 
 WORKDIR /tmp
 
@@ -58,7 +58,7 @@ RUN mkdir _pyil && \
 	cp _pyil/cuvis_il.py ./cuvis.pyil/cuvis_il
 	
 RUN cd cuvis.pyil && \
-	python${PYTHON_VERSION} -m pip install .
+	python${PYTHON_VERSION} -m pip install .  --break-system-packages
 
 # Check if bindings can be loaded	
 RUN OUTPUT=$(python${PYTHON_VERSION} -c "from cuvis_il import cuvis_il; print(cuvis_il.cuvis_version_swig())") && \

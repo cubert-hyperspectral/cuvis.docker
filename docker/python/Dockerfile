@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=20.04
+ARG UBUNTU_VERSION=24.04
 ARG CUVIS_VERSION=3.3.0
 
 FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
@@ -8,8 +8,7 @@ ARG UBUNTU_VERSION
 ARG CUVIS_VERSION
 
 FROM ubuntu:${UBUNTU_VERSION}
-ARG PYTHON_VERSION=3.12
-ARG NUMPY_VERSION=1.22.0
+
 ARG UBUNTU_VERSION
 ARG CUVIS_VERSION
 ARG CUVIS_MINOR_V=3.3
@@ -36,19 +35,19 @@ RUN mkdir cuvis && cd cuvis && \
 	
 ENV CUVIS=/lib/cuvis
 
-ARG PYTHON_VERSION=3.9
+ARG PYTHON_VERSION=3.12
+ARG NUMPY_VERSION=1.26.0
 
-RUN apt-get install curl python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev -y && \
-	curl -sS https://bootstrap.pypa.io/get-pip.py | python${PYTHON_VERSION}
+RUN apt-get install curl python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev python3-pip -y
 
 WORKDIR /app
 
 RUN cd cuvis.pyil && \
-	python${PYTHON_VERSION} -m pip install .
+	python${PYTHON_VERSION} -m pip install . --break-system-packages
 
 RUN git clone https://github.com/cubert-hyperspectral/cuvis.python.git && \
 	cd cuvis.python && \
-	python${PYTHON_VERSION} -m pip install .	
+	python${PYTHON_VERSION} -m pip install . --break-system-packages	
 	
 # Check if sdk wrapper can be loaded	
 RUN OUTPUT=$(python${PYTHON_VERSION} -c "import cuvis; print(cuvis.version())") && \
