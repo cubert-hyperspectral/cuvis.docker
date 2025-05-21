@@ -1,5 +1,5 @@
 ARG UBUNTU_VERSION=24.04
-ARG CUVIS_VERSION=3.3.0
+ARG CUVIS_VERSION=3.3.3
 
 FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
 LABEL maintainer="birkholz@cubert-gmbh.de"
