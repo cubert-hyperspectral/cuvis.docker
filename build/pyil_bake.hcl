@@ -12,6 +12,7 @@ variable "variants"  {
 group "default" { targets = ["cuvis_pyil"] }
 
 target "cuvis_pyil" {
+  name = "cuvis_pyil-ubuntu${replace(v.ubuntu, ".", "-")}"
   context    = "."
   dockerfile = "docker/pyil/Dockerfile"
   platforms  = ["linux/amd64"]
