@@ -1,5 +1,5 @@
 
-variable "cuvis_ver"     { default = "3.3.3" }     # override with --set cuvis_ver=3.4.0
+variable "cuvis_ver"     { default = "3.4.0" }     # override with --set cuvis_ver=3.4.0
 
 variable "variants"  {
   default = [
@@ -24,7 +24,6 @@ target "cuvis_python" {
     PYTHON_VERSION = "${v.py}"
     NUMPY_VERSION  = "${v.np}"
     CUVIS_VERSION  = "${cuvis_ver}"
-    CUVIS_MINOR_V = "${regex_replace(cuvis_ver, "\\.[0-9]+$", "")}"  # 3.3.3 → 3.3
   }
 
   tags = [
