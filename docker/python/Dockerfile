@@ -54,6 +54,7 @@ RUN git clone https://github.com/cubert-hyperspectral/cuvis.python.git && \
 	if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
       python${PYTHON_VERSION} -m pip install . --break-system-packages; \
     else \
+      python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel build packaging && \
       python${PYTHON_VERSION} -m pip install .; \
     fi
 	
