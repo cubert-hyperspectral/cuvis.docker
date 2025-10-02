@@ -43,11 +43,19 @@ RUN apt-get install curl python${PYTHON_VERSION} python${PYTHON_VERSION}-venv py
 WORKDIR /app
 
 RUN cd cuvis.pyil && \
-	python${PYTHON_VERSION} -m pip install . --break-system-packages
+    if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
+      python${PYTHON_VERSION} -m pip install . --break-system-packages; \
+    else \
+      python${PYTHON_VERSION} -m pip install .; \
+    fi
 
 RUN git clone https://github.com/cubert-hyperspectral/cuvis.python.git && \
 	cd cuvis.python && \
-	python${PYTHON_VERSION} -m pip install . --break-system-packages	
+	if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
+      python${PYTHON_VERSION} -m pip install . --break-system-packages; \
+    else \
+      python${PYTHON_VERSION} -m pip install .; \
+    fi
 	
 # Check if sdk wrapper can be loaded	
 RUN OUTPUT=$(python${PYTHON_VERSION} -c "import cuvis; print(cuvis.version())") && \

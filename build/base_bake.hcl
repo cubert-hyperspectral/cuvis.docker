@@ -1,5 +1,5 @@
 
-variable "cuvis_ver"     { default = "3.4.0" }     # override with --set cuvis_ver=3.4.0
+variable "cuvis_ver"     { default = "3.4.1" }     # override with --set cuvis_ver=3.4.0
 
 variable "variants"  {
   default = [
