@@ -58,8 +58,13 @@ RUN mkdir _pyil && \
 	cp _pyil/cuvis_il.py ./cuvis.pyil/cuvis_il
 	
 RUN cd cuvis.pyil && \
-	python${PYTHON_VERSION} -m pip install .  --break-system-packages
-
+	if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
+      python${PYTHON_VERSION} -m pip install . --break-system-packages; \
+    else \
+      python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel build packaging && \
+      python${PYTHON_VERSION} -m pip install .; \
+    fi
+	
 # Check if bindings can be loaded	
 RUN OUTPUT=$(python${PYTHON_VERSION} -c "from cuvis_il import cuvis_il; print(cuvis_il.cuvis_version_swig())") && \
 	echo "$OUTPUT" | grep -q "CUBERT SDK" || exit 1
