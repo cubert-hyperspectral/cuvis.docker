@@ -4,6 +4,7 @@ ARG CUVIS_VERSION=3.3.3
 FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} as pyil_base
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
+SHELL ["/bin/bash", "-lc"]
 ARG UBUNTU_VERSION
 ARG CUVIS_VERSION
 
@@ -24,7 +25,7 @@ RUN apt-get update && \
 WORKDIR /tmp
 	
 RUN mkdir cuvis && cd cuvis && \
-    wget https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${CUVIS_VERSION//./}/download -q && \
+    wget https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${CUVIS_VERSION//./}/download -q -O download && \
     unzip -q download && \
     cd  "Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
     apt-get install ./cuviscommon_${CUVIS_VERSION}-0.deb -y && \
