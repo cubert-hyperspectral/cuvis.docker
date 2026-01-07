@@ -42,6 +42,11 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1
 	./cmake_install.sh --skip-license --prefix=/opt/cmake-3.25.1 && \
 	ln -s /opt/cmake-3.25.1/bin/* /usr/local/bin
 
+# Remove PEP 668 warning once
+RUN if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
+		rm -rf /usr/lib/python${PYTHON_VERSION}/EXTERNALLY-MANAGED; \
+	fi
+
 WORKDIR /app
 
 RUN git clone https://github.com/cubert-hyperspectral/cuvis.pyil.git && \
@@ -58,12 +63,11 @@ RUN mkdir _pyil && \
 	cp _pyil/cuvis_il.py ./cuvis.pyil/cuvis_il
 	
 RUN cd cuvis.pyil && \
-	if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \
-      python${PYTHON_VERSION} -m pip install . --break-system-packages; \
-    else \
-      python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel build packaging && \
-      python${PYTHON_VERSION} -m pip install .; \
-    fi
+	if grep -q 'VERSION_ID="22.04"' /etc/os-release; then \
+		python${PYTHON_VERSION} -m pip install --upgrade pip setuptools wheel build packaging; \
+	fi && \
+	python${PYTHON_VERSION} -m pip install .
+
 	
 # Check if bindings can be loaded	
 RUN OUTPUT=$(python${PYTHON_VERSION} -c "from cuvis_il import cuvis_il; print(cuvis_il.cuvis_version_swig())") && \
