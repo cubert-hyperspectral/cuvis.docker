@@ -11,7 +11,6 @@ FROM ubuntu:${UBUNTU_VERSION}
 
 ARG UBUNTU_VERSION
 ARG CUVIS_VERSION
-ARG CUVIS_MINOR_V=3.3
 
 # Get access to Cuvis Python Interface Layer
 COPY --from=pyil_base /app/cuvis.pyil /app/cuvis.pyil
@@ -25,11 +24,11 @@ RUN apt-get update && \
 WORKDIR /tmp
 	
 RUN mkdir cuvis && cd cuvis && \
-    wget https://cloud.cubert-gmbh.de/s/qpxkyWkycrmBK9m/download -q && \
+    wget https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${CUVIS_VERSION//./}/download -q && \
     unzip -q download && \
-    cd  "Cuvis ${CUVIS_MINOR_V}/Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
-    apt-get install ./cuviscommon_${CUVIS_VERSION}-1.deb -y && \
-    apt-get install ./libcuvis_${CUVIS_VERSION}-1.deb -y && \
+    cd  "Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
+    apt-get install ./cuviscommon_${CUVIS_VERSION}-0.deb -y && \
+    apt-get install ./libcuvis_${CUVIS_VERSION}-0.deb -y && \
     cd /tmp && \
     rm -rf ./cuvis
 	
