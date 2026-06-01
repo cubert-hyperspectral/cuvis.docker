@@ -1,46 +1,22 @@
 ARG UBUNTU_VERSION=24.04
+ARG CUVIS_VERSION=3.5.3
 
-FROM ubuntu:${UBUNTU_VERSION}
+FROM cubertgmbh/cuvis_base:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
-SHELL ["/bin/bash", "-lc"]
 ARG UBUNTU_VERSION
-ARG CUVIS_VERSION=3.3.3
+ARG CUVIS_VERSION
 
 ### Avoid installer user interaction
 ENV DEBIAN_FRONTEND=noninteractive 
-
-RUN apt-get update && \
-    apt-get install git wget unzip -y
 	
-WORKDIR /tmp
-	
-RUN mkdir cuvis && cd cuvis && \
-    wget https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${CUVIS_VERSION//./}/download -q -O download && \
-    unzip -q download && \
-    cd  "Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
-    apt-get install ./cuviscommon_${CUVIS_VERSION}-0.deb -y && \
-    apt-get install ./libcuvis_${CUVIS_VERSION}-0.deb -y && \
-    cd /tmp && \
-    rm -rf ./cuvis
-
 ARG PYTHON_VERSION=3.12
 ARG NUMPY_VERSION=1.26.0
 
-ENV CUVIS=/lib/cuvis
-
-RUN apt-get install curl gcc g++ make swig -y && \
-    apt-get install python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev python3-pip -y
-
-
-WORKDIR /tmp
-
-# download and install cmake
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-Linux-x86_64.sh -q -O cmake_install.sh && \
-	chmod u+x ./cmake_install.sh && \
-	mkdir /opt/cmake-3.25.1 && \
-	./cmake_install.sh --skip-license --prefix=/opt/cmake-3.25.1 && \
-	ln -s /opt/cmake-3.25.1/bin/* /usr/local/bin
+RUN apt-get update && \ 
+	apt-get install curl gcc g++ make swig -y && \
+    apt-get install python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev python3-pip -y && \
+	apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Remove PEP 668 warning once
 RUN if grep -q 'VERSION_ID="24.04"' /etc/os-release; then \

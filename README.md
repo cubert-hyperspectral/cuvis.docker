@@ -9,6 +9,7 @@ cuvis.docker contains the build instruction for linux containers that come prein
 - **Support:** http://support.cubert-hyperspectral.com/
 
 For the individual images visit Docker Hub.
+- [cuvis_base](https://hub.docker.com/repository/docker/cubertgmbh/cuvis_base/general)
 - [cuvis_pyil](https://hub.docker.com/repository/docker/cubertgmbh/cuvis_pyil/general)
 - [cuvis_python](https://hub.docker.com/repository/docker/cubertgmbh/cuvis_python/general)
 
