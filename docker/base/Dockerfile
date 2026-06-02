@@ -6,6 +6,8 @@ LABEL maintainer="birkholz@cubert-gmbh.de"
 SHELL ["/bin/bash", "-lc"]
 ARG UBUNTU_VERSION
 ARG CUVIS_VERSION=3.5.3
+ARG ARCH=amd64
+ARG CUDA_SUFFIX=nocuda
 
 ### Avoid installer user interaction
 ENV DEBIAN_FRONTEND=noninteractive 
@@ -18,7 +20,7 @@ WORKDIR /tmp
 RUN mkdir cuvis && cd cuvis && \
     wget https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${CUVIS_VERSION//./}/download -q -O download && \
     unzip -q download && \
-    cd  "Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-amd64-nocuda" && \
+    cd  "Cuvis ${CUVIS_VERSION}/Ubuntu ${UBUNTU_VERSION}-${ARCH}-${CUDA_SUFFIX}" && \
     apt-get install ./cuviscommon_${CUVIS_VERSION}-0.deb -y && \
     apt-get install ./libcuvis_${CUVIS_VERSION}-0.deb -y && \
     cd /tmp && \

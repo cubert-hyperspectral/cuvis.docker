@@ -1,13 +1,15 @@
 ARG UBUNTU_VERSION=24.04
 ARG CUVIS_VERSION=3.5.3
+ARG TAG_SUFFIX=""
 
-FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION} AS pyil_base
+FROM cubertgmbh/cuvis_pyil:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}${TAG_SUFFIX} AS pyil_base
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION
 ARG CUVIS_VERSION
+ARG TAG_SUFFIX=""
 
-FROM cubertgmbh/cuvis_base:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}
+FROM cubertgmbh/cuvis_base:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}${TAG_SUFFIX}
 
 SHELL ["/bin/bash", "-lc"]
 ARG UBUNTU_VERSION
