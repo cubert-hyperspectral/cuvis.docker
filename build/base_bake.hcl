@@ -6,6 +6,7 @@ variable "variants"  {
     #  ubuntu    arch      cuda_suffix                          name_suffix  tag_suffix
     { ubuntu = "22.04", arch = "amd64", cuda_suffix = "nocuda",                       ns = "",       ts = ""       },
     { ubuntu = "24.04", arch = "amd64", cuda_suffix = "nocuda",                       ns = "",       ts = ""       },
+    { ubuntu = "22.04", arch = "arm64", cuda_suffix = "cuda12.2-jetson-experimental", ns = "-arm64", ts = "-arm64" },
     { ubuntu = "24.04", arch = "arm64", cuda_suffix = "cuda13.0-jetson-experimental", ns = "-arm64", ts = "-arm64" },
   ]
 }

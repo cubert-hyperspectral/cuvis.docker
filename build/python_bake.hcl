@@ -6,6 +6,7 @@ variable "variants"  {
     #  ubuntu       py        numpy      arch      name_suffix  tag_suffix
     { ubuntu = "22.04", py = "3.10", np = "1.22.0", arch = "amd64", ns = "",       ts = ""       },
     { ubuntu = "24.04", py = "3.12", np = "1.26.0", arch = "amd64", ns = "",       ts = ""       },
+    { ubuntu = "22.04", py = "3.10", np = "1.22.0", arch = "arm64", ns = "-arm64", ts = "-arm64" },
     { ubuntu = "24.04", py = "3.12", np = "1.26.0", arch = "arm64", ns = "-arm64", ts = "-arm64" },
   ]
 }
