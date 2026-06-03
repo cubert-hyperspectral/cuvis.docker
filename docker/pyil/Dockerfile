@@ -1,7 +1,8 @@
 ARG UBUNTU_VERSION=24.04
 ARG CUVIS_VERSION=3.5.3
+ARG TAG_SUFFIX=""
 
-FROM cubertgmbh/cuvis_base:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}
+FROM cubertgmbh/cuvis_base:${CUVIS_VERSION}-ubuntu${UBUNTU_VERSION}${TAG_SUFFIX}
 LABEL maintainer="birkholz@cubert-gmbh.de"
 
 ARG UBUNTU_VERSION

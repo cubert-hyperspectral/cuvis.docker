@@ -3,19 +3,21 @@ variable "cuvis_ver"     { default = "3.5.3" }     # override with --set cuvis_v
 
 variable "variants"  {
   default = [
-    #  ubuntu       py        numpy
-    { ubuntu = "22.04", py = "3.10", np = "1.22.0" },
-    { ubuntu = "24.04", py = "3.12", np = "1.26.0" }
+    #  ubuntu       py        numpy      arch      name_suffix  tag_suffix
+    { ubuntu = "22.04", py = "3.10", np = "1.22.0", arch = "amd64", ns = "",       ts = ""       },
+    { ubuntu = "24.04", py = "3.12", np = "1.26.0", arch = "amd64", ns = "",       ts = ""       },
+    { ubuntu = "22.04", py = "3.10", np = "1.22.0", arch = "arm64", ns = "-arm64", ts = "-arm64" },
+    { ubuntu = "24.04", py = "3.12", np = "1.26.0", arch = "arm64", ns = "-arm64", ts = "-arm64" },
   ]
 }
 
 group "default" { targets = ["cuvis_python"] }
 
 target "cuvis_python" {
-  name = "cuvis_python-ubuntu${replace(v.ubuntu, ".", "-")}"
+  name = "cuvis_python-ubuntu${replace(v.ubuntu, ".", "-")}${v.ns}"
   context    = "."
   dockerfile = "docker/python/Dockerfile"
-  platforms  = ["linux/amd64"]
+  platforms  = ["linux/${v.arch}"]
 
   matrix = { v = "${variants}" }
 
@@ -24,10 +26,11 @@ target "cuvis_python" {
     PYTHON_VERSION = "${v.py}"
     NUMPY_VERSION  = "${v.np}"
     CUVIS_VERSION  = "${cuvis_ver}"
+    TAG_SUFFIX     = "${v.ts}"
   }
 
   tags = [
-    "cubertgmbh/cuvis_python:${cuvis_ver}-ubuntu${v.ubuntu}",
+    "cubertgmbh/cuvis_python:${cuvis_ver}-ubuntu${v.ubuntu}${v.ts}",
   ]
 
   push = true
