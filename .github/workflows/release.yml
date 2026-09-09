@@ -22,6 +22,8 @@ jobs:
     outputs:
       sdk: ${{ steps.meta.outputs.sdk }}
       prerelease: ${{ steps.meta.outputs.prerelease }}
+      matrix: ${{ steps.targets.outputs.matrix }}
+      tags: ${{ steps.targets.outputs.tags }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -39,15 +41,25 @@ jobs:
           version: ${{ steps.meta.outputs.sdk }}
           prerelease: ${{ steps.meta.outputs.prerelease }}
 
-      - name: Verify the SDK release is downloadable
+      - name: Download the SDK release
         env:
           SDK: ${{ steps.meta.outputs.sdk }}
         run: |
           url="https://cloud.cubert-gmbh.de/s/cuvis_sdk_release_ver_${SDK//./}/download"
-          if ! curl -fsSIL -o /dev/null "$url"; then
+          if ! curl -fsSL -o "$RUNNER_TEMP/sdk.zip" "$url"; then
             echo "cuvis SDK ${SDK} is not available at ${url}."
             exit 1
           fi
+
+      # A pre-release may ship without some variants (typically the Jetson packages); those
+      # images are skipped with a warning. A final release needs all of them.
+      - name: Select the variants the SDK download packages
+        id: targets
+        env:
+          CUVIS_VERSION: ${{ steps.meta.outputs.sdk }}
+          PRERELEASE: ${{ steps.meta.outputs.prerelease }}
+        run: |
+          docker buildx bake --print             | python3 .github/scripts/sdk_targets.py --sdk-zip "$RUNNER_TEMP/sdk.zip"                 $([ "$PRERELEASE" = true ] || echo --strict)             >> "$GITHUB_OUTPUT"
 
   build:
     name: Build and push (${{ matrix.arch }})
@@ -56,10 +68,7 @@ jobs:
     environment: dockerhub
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - { arch: amd64, runner: ubuntu-latest }
-          - { arch: arm64, runner: ubuntu-24.04-arm }
+      matrix: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v5
 
@@ -76,7 +85,7 @@ jobs:
         with:
           source: .
           files: docker-bake.hcl
-          targets: ${{ matrix.arch }}
+          targets: ${{ matrix.targets }}
           push: true
 
   smoke:
@@ -84,10 +93,17 @@ jobs:
     needs: [validate, build]
     runs-on: ubuntu-latest
     steps:
-      - name: The pushed tag resolves and carries the SDK
+      - name: Every pushed tag resolves and the amd64 ones carry the SDK
         env:
-          IMAGE: cubertgmbh/cuvis_base:${{ needs.validate.outputs.sdk }}-ubuntu24.04
-        run: docker run --rm "$IMAGE" dpkg -s libcuvis cuviscommon
+          TAGS: ${{ needs.validate.outputs.tags }}
+        run: |
+          for image in $TAGS; do
+            docker manifest inspect "$image" > /dev/null
+            case "$image" in
+              *-arm64) echo "$image: manifest ok" ;;
+              *) docker run --rm "$image" dpkg -s libcuvis cuviscommon | grep -E '^(Package|Version):' ;;
+            esac
+          done
 
   github-release:
     name: Create GitHub release

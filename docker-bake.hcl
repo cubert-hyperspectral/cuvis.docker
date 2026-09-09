@@ -8,12 +8,17 @@ variable "CUVIS_VERSION" {
   }
 }
 
+# cuda_suffix is a glob over the SDK download's "Ubuntu <ubuntu>-<arch>-<suffix>" folders and
+# must match exactly one. The suffix is the SDK's choice and changes between releases: CUDA
+# builds end in the CUDA version (cuda12.9, cuda13.3), the plain build does not ("nocuda" up
+# to 3.5, "cudano" from 3.6), Jetson builds carry both the CUDA version and "-jetson".
 variable "variants" {
   default = [
-    { ubuntu = "22.04", arch = "amd64", cuda_suffix = "nocuda" },
-    { ubuntu = "24.04", arch = "amd64", cuda_suffix = "nocuda" },
-    { ubuntu = "22.04", arch = "arm64", cuda_suffix = "cuda12.2-jetson-experimental" },
-    { ubuntu = "24.04", arch = "arm64", cuda_suffix = "cuda13.0-jetson-experimental" },
+    { ubuntu = "22.04", arch = "amd64", cuda_suffix = "*[!0-9]" },
+    { ubuntu = "24.04", arch = "amd64", cuda_suffix = "*[!0-9]" },
+    { ubuntu = "26.04", arch = "amd64", cuda_suffix = "*[!0-9]" },
+    { ubuntu = "22.04", arch = "arm64", cuda_suffix = "cuda*-jetson*" },
+    { ubuntu = "24.04", arch = "arm64", cuda_suffix = "cuda*-jetson*" },
   ]
 }
 

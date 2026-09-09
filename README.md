@@ -15,7 +15,8 @@ cuvis.docker builds the Linux container image that ships the cuvis SDK ([availab
 | [cubertgmbh/cuvis_base](https://hub.docker.com/r/cubertgmbh/cuvis_base) | this repository | Ubuntu, cuvis SDK, cmake |
 | [cubertgmbh/cuvis_pyil](https://hub.docker.com/r/cubertgmbh/cuvis_pyil) | [cuvis.pyil](https://github.com/cubert-hyperspectral/cuvis.pyil) | `cuvis_base` plus the compiled `cuvis-il` interface layer in a Python virtual environment |
 
-Tags are `<sdk version>-ubuntu<22.04|24.04>[-arm64]`, for example `cubertgmbh/cuvis_base:3.5.3-ubuntu24.04`.
+Tags are `<sdk version>-ubuntu<22.04|24.04|26.04>[-arm64]`, for example `cubertgmbh/cuvis_base:3.5.3-ubuntu24.04`; Ubuntu 26.04 exists for amd64 only.
+All images package the CUDA-less SDK build except the Jetson ones.
 The tag names the SDK version only; a rebuild or a wrapper revision for the same SDK overwrites it, so a tag always points at the newest working build for that SDK.
 The arm64 variants target NVIDIA Jetson and package the CUDA build of the SDK.
 
@@ -37,7 +38,7 @@ pip install cuvis
 ## Building locally
 
 ```bash
-CUVIS_VERSION=3.5.3 docker buildx bake amd64            # both Ubuntu variants for this machine
+CUVIS_VERSION=3.5.3 docker buildx bake amd64            # all Ubuntu variants for this machine
 CUVIS_VERSION=3.5.3 docker buildx bake --print          # show what would be built
 ```
 
@@ -73,7 +74,11 @@ Append `a1`, `b1` or `rc1` for a pre-release: the pipeline runs and pushes the s
    git push origin vX.Y.Z
    ```
 
-3. `release.yml` validates the tag, the changelog and the SDK download, bakes and pushes every variant, pulls one image back to verify it, and for a final version creates the GitHub Release with the changelog section as notes.
+3. `release.yml` validates the tag and the changelog, downloads the SDK release, bakes and pushes every variant it contains packages for, verifies each pushed tag, and for a final version creates the GitHub Release with the changelog section as notes.
+
+A pre-release SDK download may lack some variants, typically the Jetson packages.
+Those images are skipped and the run finishes green with a warning annotation and a step summary listing what was built and what was not; the existing image tags for the missing variants stay as they are.
+A final release needs every variant and fails otherwise.
 
 ### One-time repository setup
 

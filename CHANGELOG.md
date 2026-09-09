@@ -13,12 +13,15 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 - `CI` - `.github/workflows/release.yml` is driven by `v*` tags: it validates the tag against this file and the SDK download, bakes and pushes `cuvis_base` for every variant on native amd64 and arm64 runners, and creates a GitHub Release from the matching section here.
   Pre-release tags (`a`, `b`, `rc` suffix) push the same image tags but create no GitHub Release.
+- `CI` - `.github/scripts/sdk_targets.py` builds only the variants the SDK download contains packages for; a pre-release finishes with a warning for the missing ones, a final release fails.
 - `CI` - `.github/actions/release-meta`, `.github/actions/changelog` and `.github/actions/tag-on-main` are shared by the cuvis.pyil and cuvis.python release workflows.
+- `cuvis_base` - Ubuntu 26.04 variant for amd64, tagged `<sdk>-ubuntu26.04`.
 - `CHANGELOG.md` - this file.
 
 ### Changed
 
 - `docker-bake.hcl` - replaces `build/base_bake.hcl`; the SDK version comes from the `CUVIS_VERSION` environment variable instead of a default in the file, and the `amd64` and `arm64` groups build one architecture natively.
+- `docker/base/Dockerfile` - the SDK variant folder is matched by a glob (`*[!0-9]` for the plain amd64 build, `cuda*-jetson*` for Jetson) instead of a pinned suffix, so the `nocuda` to `cudano` rename and CUDA version bumps between SDK releases need no change here; two matches fail the build.
 - `docker/base/Dockerfile` - `CUVIS_VERSION` has no default any more; the build fails instead of silently packaging an old SDK.
 - `README.md` - documents the image tags, the release order across cuvis.docker, cuvis.pyil and cuvis.python, and how to add the `cuvis` wrapper on top of `cuvis_pyil`.
 
