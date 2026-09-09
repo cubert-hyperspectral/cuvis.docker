@@ -44,59 +44,6 @@ CUVIS_VERSION=3.5.3 docker buildx bake --print          # show what would be bui
 
 `docker-bake.hcl` refuses to run without `CUVIS_VERSION`; there is no default version in the repository.
 
-## Release order
-
-The three repositories release in a fixed order, each gated on the previous artifact:
-
-```
-1. cuvis.docker   tag vX.Y.Z        -> cubertgmbh/cuvis_base:X.Y.Z-ubuntu*
-2. cuvis.pyil     tag vX.Y.Z.W      -> cuvis-il X.Y.Z.W on PyPI, cubertgmbh/cuvis_pyil:X.Y.Z-ubuntu*
-3. cuvis.python   tag vX.Y.Z.W      -> cuvis X.Y.Z.W on PyPI
-```
-
-- cuvis.docker checks that the SDK download for `X.Y.Z` exists.
-- cuvis.pyil checks that `cuvis_base:X.Y.Z-ubuntu24.04` exists before building wheels inside it.
-- cuvis.python checks that `cuvis_pyil:X.Y.Z-ubuntu24.04` exists; its tests run inside it.
-
-## Releasing cuvis.docker
-
-Versions are `X.Y.Z`, the cuvis SDK release being packaged.
-Use `X.Y.Z.W` for an image-only rebuild against the same SDK; the image tag stays `X.Y.Z`.
-Append `a1`, `b1` or `rc1` for a pre-release: the pipeline runs and pushes the same image tags, but no GitHub Release is created and the changelog entries stay under `## [Unreleased]`.
-
-1. Record the changes under `## [Unreleased]` in `CHANGELOG.md`.
-   For a final release rename that section to `## [X.Y.Z] - <today>` and add a fresh empty `## [Unreleased]` above it.
-2. Merge to `main`, then tag and push:
-
-   ```bash
-   git checkout main && git pull
-   git tag -a vX.Y.Z -m "cuvis_base X.Y.Z"
-   git push origin vX.Y.Z
-   ```
-
-3. `release.yml` validates the tag and the changelog, downloads the SDK release, bakes and pushes every variant it contains packages for, verifies each pushed tag, and for a final version creates the GitHub Release with the changelog section as notes.
-
-A pre-release SDK download may lack some variants, typically the Jetson packages.
-Those images are skipped and the run finishes green with a warning annotation and a step summary listing what was built and what was not; the existing image tags for the missing variants stay as they are.
-A final release needs every variant and fails otherwise.
-
-### One-time repository setup
-
-- Environment `dockerhub` under Settings -> Environments with the secrets `DOCKERHUB_USERNAME` (the organisation name) and `DOCKERHUB_TOKEN` (an organisation access token with read and write access to the image repositories).
-  cuvis.pyil needs the same environment.
-- Once the Docker organisation is on a Team, Business or Sponsored OSS plan, replace the token with an OIDC connection: create it under Docker Home -> Organization -> OIDC connections with the subject rule `repo:cubert-hyperspectral/cuvis.docker:ref:refs/tags/*`, give the `build` job `id-token: write`, and pass `DOCKERHUB_OIDC_CONNECTIONID` to `docker/login-action` instead of the password.
-- Tag protection so only maintainers can push `v*` tags; the tag push is the release decision.
-
-## Shared release tooling
-
-The wrapper repositories reference these composite actions as `cubert-hyperspectral/cuvis.docker/.github/actions/<name>@main`:
-
-| Action | Purpose |
-| --- | --- |
-| `release-meta` | Splits a version into base version, SDK version and pre-release flag; checks a tag against it. |
-| `changelog` | Validates `CHANGELOG.md`, checks it is ready for a release, or extracts one section as release notes. |
-| `tag-on-main` | Fails unless the tagged commit is an ancestor of `main`. |
-
 ### Getting involved
 
 cuvis.hub welcomes your enthusiasm and expertise!
