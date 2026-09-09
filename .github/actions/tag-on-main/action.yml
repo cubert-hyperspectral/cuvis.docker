@@ -1,0 +1,22 @@
+name: Tag on main
+description: >
+  Fail unless the checked-out commit is an ancestor of the release branch.
+  Needs a checkout with fetch-depth 0.
+inputs:
+  branch:
+    description: Branch releases are cut from
+    required: false
+    default: main
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        git fetch --no-tags origin "$BRANCH"
+        if ! git merge-base --is-ancestor HEAD "origin/$BRANCH"; then
+          echo "${GITHUB_REF_NAME} is not an ancestor of ${BRANCH}."
+          echo "Releases are cut from ${BRANCH}; merge the release pull request first."
+          exit 1
+        fi

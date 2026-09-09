@@ -1,0 +1,50 @@
+name: Changelog
+description: >
+  Validate a Keep a Changelog file, check it is ready for a given release,
+  or extract one release section as GitHub Release notes.
+inputs:
+  mode:
+    description: "'check' validates, 'extract' prints one section into the body output"
+    required: false
+    default: check
+  version:
+    description: Release version without pre-release suffix; empty checks structure only
+    required: false
+    default: ''
+  prerelease:
+    description: "'true' when the release is a pre-release (entries stay under [Unreleased])"
+    required: false
+    default: 'false'
+  changelog:
+    description: Path of the changelog file
+    required: false
+    default: CHANGELOG.md
+outputs:
+  body:
+    description: The release section body (extract mode)
+    value: ${{ steps.extract.outputs.body }}
+runs:
+  using: composite
+  steps:
+    - if: inputs.mode == 'check'
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        PRERELEASE: ${{ inputs.prerelease }}
+        CHANGELOG: ${{ inputs.changelog }}
+      run: |
+        python3 "${{ github.action_path }}/check_changelog.py" --changelog "$CHANGELOG" \
+          ${VERSION:+--version "$VERSION"} \
+          $([ "$PRERELEASE" = true ] && echo --prerelease)
+    - if: inputs.mode == 'extract'
+      id: extract
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        CHANGELOG: ${{ inputs.changelog }}
+      run: |
+        {
+          echo 'body<<CHANGELOG_SECTION'
+          python3 "${{ github.action_path }}/check_changelog.py" --changelog "$CHANGELOG" --extract "$VERSION"
+          echo CHANGELOG_SECTION
+        } >> "$GITHUB_OUTPUT"

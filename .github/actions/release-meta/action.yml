@@ -1,0 +1,34 @@
+name: Release metadata
+description: >
+  Derive base version, cuvis SDK version and pre-release flag from a version string
+  (GENERATION.MAJOR.MINOR[.PATCH][a|b|rcN]); optionally verify that a git tag names that version.
+inputs:
+  version:
+    description: Version string, with or without a leading v
+    required: true
+  tag:
+    description: Git tag that must equal v<version>; empty skips the check
+    required: false
+    default: ''
+outputs:
+  version:
+    description: The version without a leading v
+    value: ${{ steps.meta.outputs.version }}
+  base_version:
+    description: The version without its pre-release suffix
+    value: ${{ steps.meta.outputs.base_version }}
+  sdk:
+    description: The cuvis SDK version, GENERATION.MAJOR.MINOR
+    value: ${{ steps.meta.outputs.sdk }}
+  prerelease:
+    description: "'true' when the version carries an a, b or rc suffix"
+    value: ${{ steps.meta.outputs.prerelease }}
+runs:
+  using: composite
+  steps:
+    - id: meta
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        TAG: ${{ inputs.tag }}
+      run: python3 "${{ github.action_path }}/release_meta.py" --version "$VERSION" ${TAG:+--tag "$TAG"} >> "$GITHUB_OUTPUT"
