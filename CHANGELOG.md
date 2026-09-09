@@ -3,8 +3,8 @@
 All notable changes to the cuvis container images are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-Versions are `MAJOR.MINOR.PATCH`, the cuvis SDK release the images package.
-A fourth component counts image-only rebuilds against that same SDK; the image tag stays `MAJOR.MINOR.PATCH`.
+Versions are `GENERATION.MAJOR.MINOR`, the cuvis SDK release the images package.
+A fourth component counts image-only rebuilds against that same SDK; the image tag stays `GENERATION.MAJOR.MINOR`.
 Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]

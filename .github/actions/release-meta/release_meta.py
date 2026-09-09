@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Print the release facts derived from one cuvis version string, as GITHUB_OUTPUT lines.
 
-Accepted form: MAJOR.MINOR.PATCH[.TWEAK][{a|b|rc}N]
-MAJOR.MINOR.PATCH is the cuvis SDK release; TWEAK counts revisions against that SDK.
+Accepted form: GENERATION.MAJOR.MINOR[.PATCH][{a|b|rc}N]
+GENERATION.MAJOR.MINOR is the cuvis SDK release; PATCH counts revisions against that SDK.
 A pre-release suffix runs the release pipeline without producing a GitHub Release.
 """
 
@@ -16,7 +16,7 @@ VERSION = re.compile(r"(?P<base>\d+\.\d+\.\d+(?:\.\d+)?)(?P<pre>(?:a|b|rc)\d+)?"
 def facts(version):
     match = VERSION.fullmatch(version)
     if not match:
-        sys.exit(f"version {version!r} is not MAJOR.MINOR.PATCH[.TWEAK][a|b|rcN]")
+        sys.exit(f"version {version!r} is not GENERATION.MAJOR.MINOR[.PATCH][a|b|rcN]")
     base = match["base"]
     return {
         "version": version,
