@@ -5,7 +5,7 @@ LABEL maintainer="birkholz@cubert-gmbh.de"
 
 SHELL ["/bin/bash", "-lc"]
 ARG UBUNTU_VERSION
-ARG CUVIS_VERSION=3.5.3
+ARG CUVIS_VERSION
 ARG ARCH=amd64
 ARG CUDA_SUFFIX=nocuda
 
