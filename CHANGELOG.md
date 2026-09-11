@@ -9,6 +9,8 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-09-11
+
 ### Added
 
 - `CI` - `.github/workflows/release.yml` is driven by `v*` tags: it validates the tag against this file and the SDK download, bakes and pushes `cuvis_base` for every variant on native amd64 and arm64 runners, and creates a GitHub Release from the matching section here.
@@ -20,6 +22,7 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ### Changed
 
+- `cuvis_base` - packages cuvis SDK 3.6.0.
 - `docker-bake.hcl` - replaces `build/base_bake.hcl`; the SDK version comes from the `CUVIS_VERSION` environment variable instead of a default in the file, and the `amd64` and `arm64` groups build one architecture natively.
 - `docker/base/Dockerfile` - the SDK variant folder is matched by a glob (`*[!0-9]` for the plain amd64 build, `cuda*-jetson*` for Jetson) instead of a pinned suffix, so the `nocuda` to `cudano` rename and CUDA version bumps between SDK releases need no change here; two matches fail the build.
 - `docker/base/Dockerfile` - `CUVIS_VERSION` has no default any more; the build fails instead of silently packaging an old SDK.
