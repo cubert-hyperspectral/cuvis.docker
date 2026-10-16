@@ -9,6 +9,12 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-10-16
+
+### Changed
+
+- `cuvis_base` - packages cuvis SDK 3.6.1.
+
 ## [3.6.0] - 2026-09-11
 
 ### Added
