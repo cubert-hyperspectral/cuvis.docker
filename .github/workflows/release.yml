@@ -3,10 +3,22 @@ name: Release
 # Pushing a vX.Y.Z tag on main builds cubertgmbh/cuvis_base:X.Y.Z-ubuntu* for every
 # variant and creates a GitHub Release from the CHANGELOG.md section.
 # A pre-release tag (vX.Y.Zrc1) pushes the same image tags but creates no release.
+# A manual run rebuilds the images of an existing release from its tag, for SDK installers
+# that were replaced under the same version, and appends the reason to that release.
 # Dry runs are local: CUVIS_VERSION=X.Y.Z docker buildx bake amd64
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag whose images to rebuild (e.g. v3.6.1)
+        required: true
+        type: string
+      reason:
+        description: Why the images are rebuilt; published on the release page
+        required: true
+        type: string
 
 concurrency:
   group: release
@@ -27,12 +39,31 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
 
       - id: meta
         uses: ./.github/actions/release-meta
         with:
-          version: ${{ github.ref_name }}
+          version: ${{ inputs.tag || github.ref_name }}
+
+      - name: A rebuild targets an existing final release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          REASON: ${{ inputs.reason }}
+          PRERELEASE: ${{ steps.meta.outputs.prerelease }}
+        run: |
+          if [ "$PRERELEASE" = true ]; then
+            echo "::error::${TAG} is a pre-release tag; it has no GitHub Release to record the rebuild on."
+            exit 1
+          fi
+          if [ -z "${REASON//[[:space:]]/}" ]; then
+            echo "::error::reason is empty."
+            exit 1
+          fi
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json name --jq '"Rebuilding \(.name)"'
 
       - uses: ./.github/actions/tag-on-main
 
@@ -59,7 +90,10 @@ jobs:
           CUVIS_VERSION: ${{ steps.meta.outputs.sdk }}
           PRERELEASE: ${{ steps.meta.outputs.prerelease }}
         run: |
-          docker buildx bake --print             | python3 .github/scripts/sdk_targets.py --sdk-zip "$RUNNER_TEMP/sdk.zip"                 $([ "$PRERELEASE" = true ] || echo --strict)             >> "$GITHUB_OUTPUT"
+          docker buildx bake --print \
+            | python3 .github/scripts/sdk_targets.py --sdk-zip "$RUNNER_TEMP/sdk.zip" \
+                $([ "$PRERELEASE" = true ] || echo --strict) \
+            >> "$GITHUB_OUTPUT"
 
   build:
     name: Build and push (${{ matrix.arch }})
@@ -71,6 +105,8 @@ jobs:
       matrix: ${{ fromJSON(needs.validate.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: docker/setup-buildx-action@v4
 
@@ -108,7 +144,7 @@ jobs:
   github-release:
     name: Create GitHub release
     needs: [validate, smoke]
-    if: needs.validate.outputs.prerelease == 'false'
+    if: needs.validate.outputs.prerelease == 'false' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -127,3 +163,24 @@ jobs:
           body: ${{ steps.notes.outputs.body }}
           draft: false
           prerelease: false
+
+  record-rebuild:
+    name: Record the rebuild on the release
+    needs: [validate, smoke]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          REASON: ${{ inputs.reason }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/body.md"
+          {
+            grep -qx '## Image Rebuilds' "$RUNNER_TEMP/body.md" || printf '\n## Image Rebuilds\n\n'
+            echo "- $(date -u +%F) - ${REASON} ([run](${RUN_URL}))"
+          } >> "$RUNNER_TEMP/body.md"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/body.md"
