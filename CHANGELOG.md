@@ -9,6 +9,11 @@ Pre-releases (`b*`, `rc*`) are not listed.
 
 ## [Unreleased]
 
+### Added
+
+- `CI` - `.github/workflows/release.yml` can be run manually with a `tag` and a required `reason` to rebuild and push the images of an existing release, for SDK installers replaced under the same version.
+  It builds from the tag, not from `main`, and appends the reason to that release under `## Image Rebuilds` with the date and a link to the run instead of creating a release.
+
 ## [3.6.1] - 2026-10-16
 
 ### Changed
